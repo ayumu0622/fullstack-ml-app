@@ -1,0 +1,5 @@
+backend/machine_learning/data/train.csv
+backend/machine_learning/model/model.pkl
+backend/machine_learning/__pycache__
+backend/venv
+.vscode
