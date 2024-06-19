@@ -1,5 +1,9 @@
+
 <script setup lang="ts">
-import {reactive} from 'vue'
+
+import {ref, reactive} from 'vue'
+import axios from 'axios'
+
  type typeOfFeatures = {
   Sex: 'Male'|'Female'|'What is your gender?'
   Pclass: string
@@ -17,16 +21,61 @@ import {reactive} from 'vue'
    SibSp: 'How many siblings are you with?'
  })
 
- const displayOutput = (): void => {
-   alert(`
-     Gender: ${features.Sex}
-     Class: ${features.Pclass} 
-     Age: ${features.Age} 
-     Parents: ${features.Parch} 
-     Siblings: ${features.SibSp}
-   `)
-  }
+ const survivalProbability = ref<number|undefined>()
 
+ const validateRequestValues = (): boolean => {
+   if (features.Sex == 'What is your gender?') {
+     alert('Fill in your gender')
+     return false
+   }
+   if (features.Pclass == 'What is your class?') {
+     alert('Fill in your class')
+     return false
+   } 
+   if (features.Age == 'How old are you?') {
+     alert('Fill in your age')
+     return false
+   } 
+   if (features.Parch == 'How many parents and children are you with?') {
+     alert('Fill in the number of children')
+     return false
+   } 
+   if (features.SibSp == 'How many siblings are you with?') {
+     alert('Fill in the number of siblings')
+     return false
+   }
+   return true  
+ }
+
+//  const displayOutput = (): void => {
+//    alert(`
+//      Gender: ${features.Sex}
+//      Class: ${features.Pclass} 
+//      Age: ${features.Age} 
+//      Parents: ${features.Parch} 
+//      Siblings: ${features.SibSp}
+//    `)
+//   }
+
+
+const displayOutput = (): void => {
+   
+   const endPoint: string = 'http://localhost:5001/api/titanic'
+   const validationResult: boolean = validateRequestValues()
+   if (validationResult === true) { 
+     axios.post(
+       endPoint, features
+     ).then(
+       (response) => {
+         survivalProbability.value = 100 * response.data.survival_probability as number
+       }
+     ).catch(
+       () => {
+         alert('エラーが発生しました。')
+       } 
+     )
+   }
+ }
 
 
 </script>
@@ -76,5 +125,10 @@ import {reactive} from 'vue'
    </select> people
    <br>
    <button class="btn btn-primary" v-on:click="displayOutput()">output the result</button>
+   <template v-if="survivalProbability !== undefined">
+     <div class="alert alert-error mt-4 ">
+       Your survival rate is {{ survivalProbability }}
+     </div>
+   </template>
  </div>
 </template>
